@@ -1,0 +1,7 @@
+venv/
+__pycache__/
+*.pyc
+.env
+qr_codes/*.png
+.pytest_cache/
+test.db
