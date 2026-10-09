@@ -6,6 +6,7 @@ import enum
 
 class UserRole(str, enum.Enum):
     USER = "USER"
+    ORGANIZER = "ORGANIZER"
     ADMIN = "ADMIN"
 
 class User(Base):
@@ -18,5 +19,6 @@ class User(Base):
     role = Column(SQLEnum(UserRole), default=UserRole.USER, nullable=False)
     created_at = Column(DateTime, server_default=func.now())
 
+    events = relationship("Event", back_populates="organizer")
     bookings = relationship("Booking", back_populates="user", cascade="all, delete")
     notifications = relationship("Notification", back_populates="user", cascade="all, delete")

@@ -16,6 +16,12 @@ def create_booking(db: Session, user_id: int, booking_in: BookingCreate) -> Book
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")
         
+    from app.models.event import EventStatus
+    if event.event_status == EventStatus.CANCELLED:
+        raise HTTPException(status_code=400, detail="Cannot book a cancelled event")
+    if event.event_status == EventStatus.COMPLETED:
+        raise HTTPException(status_code=400, detail="Cannot book a completed event")
+        
     if event.available_tickets < booking_in.ticket_quantity:
         if event.available_tickets == 0:
             raise HTTPException(status_code=400, detail="Event is sold out")

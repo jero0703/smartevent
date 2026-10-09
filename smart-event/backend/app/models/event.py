@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, Enum as SQLEnum, DateTime, DECIMAL, CheckConstraint
+from sqlalchemy import Column, Integer, String, Text, Enum as SQLEnum, DateTime, DECIMAL, CheckConstraint, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.core.database import Base
@@ -10,6 +10,12 @@ class EventCategory(str, enum.Enum):
     Sports = "Sports"
     Business = "Business"
 
+class EventStatus(str, enum.Enum):
+    UPCOMING = "UPCOMING"
+    ONGOING = "ONGOING"
+    COMPLETED = "COMPLETED"
+    CANCELLED = "CANCELLED"
+
 class Event(Base):
     __tablename__ = "events"
 
@@ -18,13 +24,16 @@ class Event(Base):
     description = Column(Text)
     category = Column(SQLEnum(EventCategory), nullable=False)
     location = Column(String(255), nullable=False)
-    event_date = Column(DateTime, nullable=False)
+    event_date = Column(DateTime, nullable=False, index=True)
     ticket_price = Column(DECIMAL(10, 2), nullable=False)
     total_tickets = Column(Integer, nullable=False)
     available_tickets = Column(Integer, nullable=False)
     banner_image = Column(String(255))
+    organizer_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
+    event_status = Column(SQLEnum(EventStatus), default=EventStatus.UPCOMING, nullable=False, index=True)
     created_at = Column(DateTime, server_default=func.now())
 
+    organizer = relationship("User", back_populates="events")
     bookings = relationship("Booking", back_populates="event", cascade="all, delete")
 
     __table_args__ = (

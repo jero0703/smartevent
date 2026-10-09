@@ -34,6 +34,19 @@ def get_my_tickets(
 @router.get("/verify/{ticket_code}", response_model=TicketVerificationResponse)
 def verify_ticket_endpoint(
     ticket_code: str,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
+    ticket = db.query(Ticket).filter(Ticket.ticket_code == ticket_code).first()
+    if not ticket:
+        raise HTTPException(status_code=404, detail="Ticket not found")
+        
+    from app.models.user import UserRole
+    if current_user.role == UserRole.USER:
+        raise HTTPException(status_code=403, detail="Users cannot verify tickets")
+        
+    if current_user.role == UserRole.ORGANIZER:
+        if ticket.booking.event.organizer_id != current_user.id:
+            raise HTTPException(status_code=403, detail="You can only verify tickets for your own events")
+            
     return verify_ticket(db, ticket_code)

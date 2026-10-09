@@ -47,7 +47,13 @@ def get_booking_details(
     if not booking:
         raise HTTPException(status_code=404, detail="Booking not found")
     if booking.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not authorized to access this booking")
+        from app.models.user import UserRole
+        if current_user.role == UserRole.ADMIN:
+            pass # Admin can see
+        elif current_user.role == UserRole.ORGANIZER and booking.event.organizer_id == current_user.id:
+            pass # Organizer can see their own event's booking
+        else:
+            raise HTTPException(status_code=403, detail="Not authorized to access this booking")
     return booking
 
 @router.patch("/{booking_id}/cancel", response_model=BookingResponse)

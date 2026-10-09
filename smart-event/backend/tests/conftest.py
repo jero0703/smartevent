@@ -51,3 +51,21 @@ def client(db):
     app.dependency_overrides[get_db] = override_get_db
     yield TestClient(app)
     app.dependency_overrides.clear()
+
+@pytest.fixture
+def auth_header(client):
+    client.post("/auth/register", json={"username": "user", "email": "user@example.com", "password": "Password123"})
+    res = client.post("/auth/login", data={"username": "user@example.com", "password": "Password123"})
+    return {"Authorization": f"Bearer {res.json()['access_token']}"}
+
+@pytest.fixture
+def auth_header_organizer(client):
+    client.post("/auth/register", json={"username": "org", "email": "org@example.com", "password": "Password123", "role": "ORGANIZER"})
+    res = client.post("/auth/login", data={"username": "org@example.com", "password": "Password123"})
+    return {"Authorization": f"Bearer {res.json()['access_token']}"}
+
+@pytest.fixture
+def auth_header_admin(client):
+    client.post("/auth/register", json={"username": "admin_test", "email": "admin_test@example.com", "password": "Password123", "role": "ADMIN"})
+    res = client.post("/auth/login", data={"username": "admin_test@example.com", "password": "Password123"})
+    return {"Authorization": f"Bearer {res.json()['access_token']}"}

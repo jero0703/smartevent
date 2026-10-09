@@ -11,8 +11,14 @@ def verify_ticket(db: Session, ticket_code: str):
         
     booking = ticket.booking
     
+    from app.models.event import EventStatus
+    
+    is_valid = booking.booking_status == BookingStatus.CONFIRMED
+    if booking.event.event_status == EventStatus.CANCELLED:
+        is_valid = False
+    
     return {
-        "valid": booking.booking_status == BookingStatus.CONFIRMED,
+        "valid": is_valid,
         "ticket_code": ticket.ticket_code,
         "event": booking.event.title,
         "booking_id": booking.id,
