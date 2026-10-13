@@ -14,3 +14,4 @@ pillow>=10.2.0
 pytest>=8.0.0
 httpx>=0.26.0
 cryptography>=42.0.0
+stripe>=10.0.0

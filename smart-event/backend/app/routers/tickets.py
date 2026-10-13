@@ -31,21 +31,37 @@ def get_my_tickets(
         })
     return response
 
+from fastapi.security import OAuth2PasswordBearer
+from jose import jwt
+from typing import Optional
+from app.core.config import settings
+
+optional_oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login", auto_error=False)
+
+def get_optional_user(token: Optional[str] = Depends(optional_oauth2_scheme), db: Session = Depends(get_db)) -> Optional[User]:
+    if not token:
+        return None
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        user_id = payload.get("sub")
+        if user_id is None:
+            return None
+        return db.query(User).filter(User.id == int(user_id)).first()
+    except Exception:
+        return None
+
 @router.get("/verify/{ticket_code}", response_model=TicketVerificationResponse)
 def verify_ticket_endpoint(
     ticket_code: str,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: Optional[User] = Depends(get_optional_user)
 ):
     ticket = db.query(Ticket).filter(Ticket.ticket_code == ticket_code).first()
     if not ticket:
         raise HTTPException(status_code=404, detail="Ticket not found")
         
     from app.models.user import UserRole
-    if current_user.role == UserRole.USER:
-        raise HTTPException(status_code=403, detail="Users cannot verify tickets")
-        
-    if current_user.role == UserRole.ORGANIZER:
+    if current_user and current_user.role == UserRole.ORGANIZER:
         if ticket.booking.event.organizer_id != current_user.id:
             raise HTTPException(status_code=403, detail="You can only verify tickets for your own events")
             

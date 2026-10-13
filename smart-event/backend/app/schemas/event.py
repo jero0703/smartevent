@@ -19,6 +19,8 @@ class EventCreate(EventBase):
 
 class EventResponse(EventBase):
     id: int
+    organizer_id: Optional[int] = None
+    event_status: Optional[str] = "UPCOMING"
     created_at: datetime
 
     model_config = {"from_attributes": True}
@@ -29,3 +31,4 @@ class PaginatedEventResponse(BaseModel):
     limit: int
     total: int
     pages: int
+    total_pages: Optional[int] = None

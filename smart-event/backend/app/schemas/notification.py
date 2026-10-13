@@ -2,10 +2,13 @@ from pydantic import BaseModel
 from datetime import datetime
 from app.models.notification import NotificationType
 
+from typing import Optional
+
 class NotificationBase(BaseModel):
     title: str
     message: str
     type: NotificationType
+    notification_type: Optional[NotificationType] = None
     is_read: bool = False
 
 class NotificationResponse(NotificationBase):

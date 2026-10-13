@@ -35,6 +35,7 @@ class Event(Base):
 
     organizer = relationship("User", back_populates="events")
     bookings = relationship("Booking", back_populates="event", cascade="all, delete")
+    reviews = relationship("Review", back_populates="event", cascade="all, delete")
 
     __table_args__ = (
         CheckConstraint('ticket_price >= 0', name='check_ticket_price_positive'),

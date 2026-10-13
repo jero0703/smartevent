@@ -9,6 +9,14 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     QR_CODE_DIR: str = "qr_codes"
     
+    # Phase 3: Payment Configuration
+    PAYMENT_PROVIDER: str = "simulation"
+    PAYMENT_SIMULATION_ENABLED: bool = True
+    STRIPE_SECRET_KEY: Optional[str] = None
+    STRIPE_WEBHOOK_SECRET: Optional[str] = None
+    STRIPE_SUCCESS_URL: Optional[str] = "http://localhost:8000/payments/success"
+    STRIPE_CANCEL_URL: Optional[str] = "http://localhost:8000/payments/cancel"
+    
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 settings = Settings()

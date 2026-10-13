@@ -7,6 +7,7 @@ import enum
 class NotificationType(str, enum.Enum):
     EVENT = "EVENT"
     BOOKING = "BOOKING"
+    PAYMENT = "PAYMENT"
     SYSTEM = "SYSTEM"
 
 class Notification(Base):
@@ -16,7 +17,8 @@ class Notification(Base):
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     title = Column(String(255), nullable=False)
     message = Column(Text, nullable=False)
-    type = Column(SQLEnum(NotificationType), nullable=False)
+    type = Column("type", SQLEnum(NotificationType), nullable=False)
+    notification_type = Column("notification_type", SQLEnum(NotificationType), nullable=True)
     is_read = Column(Boolean, default=False)
     created_at = Column(DateTime, server_default=func.now())
 

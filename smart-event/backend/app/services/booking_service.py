@@ -29,12 +29,31 @@ def create_booking(db: Session, user_id: int, booking_in: BookingCreate) -> Book
         
     total_price = event.ticket_price * booking_in.ticket_quantity
     
+    # Process optional coupon
+    coupon_id = None
+    discount_amount = 0.00
+    final_amount = total_price
+
+    if booking_in.coupon_code:
+        from app.services.coupon_service import validate_coupon_and_calculate_discount
+        coupon, discount_amount, final_amount = validate_coupon_and_calculate_discount(
+            db=db,
+            coupon_code=booking_in.coupon_code,
+            booking_amount=float(total_price)
+        )
+        coupon_id = coupon.id
+    
+    target_status = booking_in.status if booking_in.status is not None else BookingStatus.CONFIRMED
+
     booking = Booking(
         user_id=user_id,
         event_id=event.id,
         ticket_quantity=booking_in.ticket_quantity,
         total_price=total_price,
-        booking_status=BookingStatus.CONFIRMED
+        coupon_id=coupon_id,
+        discount_amount=discount_amount,
+        final_amount=final_amount,
+        booking_status=target_status
     )
     
     db.add(booking)
@@ -42,25 +61,34 @@ def create_booking(db: Session, user_id: int, booking_in: BookingCreate) -> Book
     
     db.flush()
     
-    # Generate Ticket
-    ticket_code = f"TKT-{uuid.uuid4().hex[:8].upper()}"
-    qr_url = generate_qr_code(ticket_code, booking.id)
-    
-    ticket = Ticket(
-        booking_id=booking.id,
-        ticket_code=ticket_code,
-        qr_code_url=qr_url
-    )
-    db.add(ticket)
-    
-    # Generate Notification
-    create_notification(
-        db=db,
-        user_id=user_id,
-        title="Booking Confirmed",
-        message=f"Your booking for {event.title} has been confirmed.",
-        type=NotificationType.BOOKING
-    )
+    if target_status == BookingStatus.CONFIRMED:
+        # Generate Ticket only if booking is confirmed
+        ticket_code = f"TKT-{uuid.uuid4().hex[:8].upper()}"
+        qr_url = generate_qr_code(ticket_code, booking.id)
+        
+        ticket = Ticket(
+            booking_id=booking.id,
+            ticket_code=ticket_code,
+            qr_code_url=qr_url
+        )
+        db.add(ticket)
+        
+        # Generate Notification
+        create_notification(
+            db=db,
+            user_id=user_id,
+            title="Booking Confirmed",
+            message=f"Your booking for {event.title} has been confirmed.",
+            type=NotificationType.BOOKING
+        )
+    else:
+        create_notification(
+            db=db,
+            user_id=user_id,
+            title="Booking Initiated",
+            message=f"Your booking for {event.title} is pending payment.",
+            type=NotificationType.BOOKING
+        )
     
     try:
         db.commit()

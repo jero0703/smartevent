@@ -22,3 +22,4 @@ class User(Base):
     events = relationship("Event", back_populates="organizer")
     bookings = relationship("Booking", back_populates="user", cascade="all, delete")
     notifications = relationship("Notification", back_populates="user", cascade="all, delete")
+    reviews = relationship("Review", back_populates="user", cascade="all, delete")

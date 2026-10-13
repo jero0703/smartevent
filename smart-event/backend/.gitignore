@@ -5,3 +5,4 @@ __pycache__/
 qr_codes/*.png
 .pytest_cache/
 test.db
+test_qr_codes/

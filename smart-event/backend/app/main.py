@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.database import engine, Base
-from app.routers import auth, users, events, bookings, tickets, notifications, organizer, admin
+from app.routers import auth, users, events, bookings, tickets, notifications, organizer, admin, payments, coupons, reviews
 from contextlib import asynccontextmanager
 
 @asynccontextmanager
@@ -63,6 +63,9 @@ app.include_router(tickets.router)
 app.include_router(notifications.router)
 app.include_router(organizer.router)
 app.include_router(admin.router)
+app.include_router(payments.router)
+app.include_router(coupons.router)
+app.include_router(reviews.router)
 
 @app.get("/health", tags=["Health"])
 def health_check():
