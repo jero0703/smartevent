@@ -17,6 +17,11 @@ class Settings(BaseSettings):
     STRIPE_SUCCESS_URL: Optional[str] = "http://localhost:8000/payments/success"
     STRIPE_CANCEL_URL: Optional[str] = "http://localhost:8000/payments/cancel"
     
+    # Phase 4: AI & Real-time Configuration
+    AI_PROVIDER: str = "fallback"  # Options: fallback, mock, openai, gemini
+    AI_API_KEY: Optional[str] = None
+    AI_MODEL: str = "gemini-1.5-flash"
+    
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 settings = Settings()

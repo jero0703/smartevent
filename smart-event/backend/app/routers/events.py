@@ -6,7 +6,11 @@ from datetime import datetime
 from app.core.database import get_db
 from app.models.event import Event, EventCategory, EventStatus
 from app.models.booking import Booking, BookingStatus
-from app.schemas.event import EventResponse, PaginatedEventResponse
+from app.schemas.event import EventResponse, PaginatedEventResponse, EventAvailabilityResponse
+from app.services.auth_service import get_current_user
+from app.models.user import User
+from app.models.event_view import EventView
+from app.services.availability_service import get_event_availability
 
 router = APIRouter(prefix="/events", tags=["Events"])
 
@@ -110,3 +114,21 @@ def get_event(event_id: int, db: Session = Depends(get_db)):
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")
     return event
+
+@router.get("/{event_id}/availability", response_model=EventAvailabilityResponse)
+def get_event_availability_endpoint(event_id: int, db: Session = Depends(get_db)):
+    return get_event_availability(db, event_id)
+
+@router.post("/{event_id}/view", status_code=status.HTTP_200_OK)
+def record_event_view_endpoint(
+    event_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    event = db.query(Event).filter(Event.id == event_id).first()
+    if not event:
+        raise HTTPException(status_code=404, detail="Event not found")
+    view = EventView(user_id=current_user.id, event_id=event_id)
+    db.add(view)
+    db.commit()
+    return {"message": "Event view recorded", "event_id": event_id, "user_id": current_user.id}

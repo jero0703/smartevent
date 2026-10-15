@@ -168,6 +168,8 @@ def process_payment_success(
 
     db.commit()
     db.refresh(payment)
+    from app.services.availability_service import broadcast_current_availability
+    broadcast_current_availability(db, booking.event_id)
     return payment
 
 def process_payment_failure(

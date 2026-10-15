@@ -1,1 +1,18 @@
-from app.routers import auth, users, events, bookings, tickets, notifications, organizer, admin, payments, coupons, reviews
+from app.routers import (
+    auth,
+    users,
+    events,
+    bookings,
+    tickets,
+    notifications,
+    organizer,
+    admin,
+    payments,
+    coupons,
+    reviews,
+    recommendations,
+    wishlist,
+    event_updates,
+    chatbot,
+    websockets
+)

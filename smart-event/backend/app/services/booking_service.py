@@ -93,6 +93,8 @@ def create_booking(db: Session, user_id: int, booking_in: BookingCreate) -> Book
     try:
         db.commit()
         db.refresh(booking)
+        from app.services.availability_service import broadcast_current_availability
+        broadcast_current_availability(db, event.id)
         return booking
     except Exception as e:
         db.rollback()
@@ -135,6 +137,8 @@ def cancel_booking(db: Session, booking_id: int, user_id: int) -> Booking:
     try:
         db.commit()
         db.refresh(booking)
+        from app.services.availability_service import broadcast_current_availability
+        broadcast_current_availability(db, event.id)
         return booking
     except Exception as e:
         db.rollback()

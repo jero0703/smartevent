@@ -1,7 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.database import engine, Base
-from app.routers import auth, users, events, bookings, tickets, notifications, organizer, admin, payments, coupons, reviews
+from app.routers import (
+    auth, users, events, bookings, tickets, notifications,
+    organizer, admin, payments, coupons, reviews,
+    recommendations, wishlist, event_updates, chatbot, websockets
+)
 from contextlib import asynccontextmanager
 
 @asynccontextmanager
@@ -66,6 +70,11 @@ app.include_router(admin.router)
 app.include_router(payments.router)
 app.include_router(coupons.router)
 app.include_router(reviews.router)
+app.include_router(recommendations.router)
+app.include_router(wishlist.router)
+app.include_router(event_updates.router)
+app.include_router(chatbot.router)
+app.include_router(websockets.router)
 
 @app.get("/health", tags=["Health"])
 def health_check():

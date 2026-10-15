@@ -32,3 +32,11 @@ class PaginatedEventResponse(BaseModel):
     total: int
     pages: int
     total_pages: Optional[int] = None
+
+class EventAvailabilityResponse(BaseModel):
+    event_id: int
+    total_capacity: int
+    tickets_sold: int
+    available_tickets: int
+
+    model_config = {"from_attributes": True}
